@@ -200,11 +200,14 @@ def AsdlToPy(asdl_string: str) -> str:
         return f"class {name}(AST):\n\tdef __init__(self, {params}):\n\t\tself._attribs = ({names})\n\t\t{assignments}"
     
     def GenDataClass(name: str, fields: list['Field'], parent: str = "AST", parent_attribs: list['Field'] = []) -> str:
-        if len(fields) == 0 and len(parent_attribs) == 0:
+        if len(fields) == 0:
             return f"class {name}({parent}): pass"
         
         superctor = ""
-        names = ", ".join(map(lambda x: f'"{x.field_name}"', fields))
+        if len(fields) > 0:
+            fields_list = "self._fields = (" + ", ".join(map(lambda x: f'"{x.field_name}"', fields)) + ")"
+        else:
+            fields_list = ""
         attrib_args = ", ".join(map(lambda x: f"{x.field_name}", parent_attribs))
         attrib_params = ", ".join(map(ToParam, parent_attribs))
         params = ", ".join(map(ToParam, fields))
@@ -216,7 +219,7 @@ def AsdlToPy(asdl_string: str) -> str:
             superctor = f"super().__init__({attrib_args})\n\t\t"
         assignments = "".join("\n\t\t" + x for x in map(ToAssign, fields))
         
-        return f"class {name}({parent}):\n\tdef __init__(self, {params}):\n\t\t{superctor}self._fields = ({names}){assignments}"
+        return f"class {name}({parent}):\n\tdef __init__(self, {params}):\n\t\t{superctor}{fields_list}{assignments}"
     
     ast += f"\n\n### GENERATED CLASSES FOR {asdl.mod_name} ###"
     
