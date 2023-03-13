@@ -4,7 +4,7 @@ import ast as pyast
 import textwrap
 from dataclasses import dataclass
 
-# Default types: ident, int (or char), string
+# Default types: ident, int (or char), string (or str), boolean (or bool)
 #
 # Module = 'module' name '{' TypeDef* '}'
 # TypeDef = (type_name '=' Type)*
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 # fields = '(' field (',' field)* ')'
 # field = type_name ('?'|'*'|'+')? field_name
 
-_default_types = {"ident": str, "int": int, "char": int, "str": str, "string": str}
+_default_types = {"ident": str, "int": int, "char": int, "string": str, "str": str, "boolean": bool, "bool": bool}
 
 def ParseAsdl(asdl_string: str) -> 'Module':
     regex_flag = re.DOTALL | re.MULTILINE
