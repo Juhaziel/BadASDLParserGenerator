@@ -191,36 +191,46 @@ def AsdlToPy(asdl_string: str) -> str:
     
     def GenAbstractClass(name: str, attribs: list['Field']) -> str:
         if len(attribs) == 0:
-            return f"\nclass {name}(AST): pass"
+            return f"class {name}(AST): pass"
         
         names = ", ".join(map(lambda x: f'"{x.field_name}"', attribs))
         params = ", ".join(map(ToParam, attribs))
         assignments = "\n\t\t".join(map(ToAssign, attribs))
         
-        return f"\nclass {name}(AST):\n\tdef __init__(self, {params}):\n\t\tself._attribs = ({names})\n\t\t{assignments}"
+        return f"class {name}(AST):\n\tdef __init__(self, {params}):\n\t\tself._attribs = ({names})\n\t\t{assignments}"
     
-    def GenDataClass(name: str, fields: list['Field'], parent: str = "AST") -> str:
-        if len(fields) == 0:
+    def GenDataClass(name: str, fields: list['Field'], parent: str = "AST", parent_attribs: list['Field'] = []) -> str:
+        if len(fields) == 0 and len(parent_attribs) == 0:
             return f"class {name}({parent}): pass"
         
+        superctor = ""
         names = ", ".join(map(lambda x: f'"{x.field_name}"', fields))
+        attrib_args = ", ".join(map(lambda x: f"{x.field_name}", parent_attribs))
+        attrib_params = ", ".join(map(ToParam, parent_attribs))
         params = ", ".join(map(ToParam, fields))
-        assignments = "\n\t\t".join(map(ToAssign, fields))
+        if len(parent_attribs) > 0:
+            if params.strip() == "":
+                params = attrib_args
+            else:
+                params = ", ".join([attrib_params, params])
+            superctor = f"super().__init__({attrib_args})\n\t\t"
+        assignments = "".join("\n\t\t" + x for x in map(ToAssign, fields))
         
-        return f"\nclass {name}({parent}):\n\tdef __init__(self, {params}):\n\t\tself._fields = ({names})\n\t\t{assignments}"
+        return f"class {name}({parent}):\n\tdef __init__(self, {params}):\n\t\t{superctor}self._fields = ({names}){assignments}"
     
     ast += f"\n\n### GENERATED CLASSES FOR {asdl.mod_name} ###"
     
     unique_types = set()
     
     for typedef in asdl.typedefs:
-        ast += "\n"
         if isinstance(typedef.type_def, ProductType):
+            ast += f"\n\n## TYPE '{typedef.type_name}'\n"
             ast += GenDataClass(typedef.type_name, typedef.type_def.fields)
         elif isinstance(typedef.type_def, SumType):
+            ast += f"\n\n## TYPE '{typedef.type_name}'\n"
             ast += GenAbstractClass(typedef.type_name, typedef.type_def.attribs)
             for ctor in typedef.type_def.ctors:
-                ast += "\n"
-                ast += GenDataClass(ctor.ctor_name, ctor.fields, typedef.type_name)
+                ast += "\n\n"
+                ast += GenDataClass(ctor.ctor_name, ctor.fields, typedef.type_name, typedef.type_def.attribs)
     
     return ast
