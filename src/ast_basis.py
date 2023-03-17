@@ -9,6 +9,7 @@ https://docs.python.org/3/library/ast.html
 class AST:
     _fields: tuple[str, ...] = ()
     _attribs: tuple[str, ...] = ()
+    symref: any | None = None # A reference to a symbol in a symbol table
     lineno: int | None = None
     col_offset: int | None = None
     end_lineno: int | None = None

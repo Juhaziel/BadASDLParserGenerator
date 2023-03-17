@@ -1,7 +1,5 @@
 # This module implements a parser for a variation of ASDL as an exercise
 import re
-import ast as pyast
-import textwrap
 from dataclasses import dataclass
 
 # Default types: ident, int (or char), string (or str), boolean (or bool), float
