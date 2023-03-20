@@ -33,17 +33,18 @@ def get_source_segment(source: str, node: 'AST', padded: bool = False) -> str | 
     lines = []
     cur_line = ""
     for c in source:
-        if len(lines) == end_lineno + 1: break
+        if len(lines) == end_lineno: break
         if c == "\n":
             lines.append(cur_line)
             cur_line = ""
             continue
         cur_line += c
+    if cur_line != "": lines.append(cur_line)
     del c, cur_line
     
-    for _ in range(lineno): lines.pop(1)
+    for _ in range(lineno-1): lines.pop(0)
     lines[end_lineno-lineno] = lines[end_lineno-lineno][:end_col_offset+1]
-    lines[lineno] = lines[lineno][col_offset:]
+    lines[0] = lines[0][col_offset:]
     return "\n".join(lines)
 
 def copy_location(old_node: 'AST', new_node: 'AST') -> 'AST':
