@@ -196,7 +196,7 @@ def AsdlToPy(asdl_string: str) -> str:
         params = ", ".join(map(ToParam, attribs))
         assignments = "\n\t\t".join(map(ToAssign, attribs))
         
-        return f"class {name}(AST):\n\tdef __init__(self, {params}):\n\t\tself._attribs = ({names})\n\t\t{assignments}"
+        return f"class {name}(AST):\n\tdef __init__(self, {params}):\n\t\tself._attribs = ({names},)\n\t\t{assignments}"
     
     def GenDataClass(name: str, fields: list['Field'], parent: str = "AST", parent_attribs: list['Field'] = []) -> str:
         if len(fields) == 0:
@@ -204,7 +204,7 @@ def AsdlToPy(asdl_string: str) -> str:
         
         superctor = ""
         if len(fields) > 0:
-            fields_list = "self._fields = (" + ", ".join(map(lambda x: f'"{x.field_name}"', fields)) + ")"
+            fields_list = "self._fields = (" + ", ".join(map(lambda x: f'"{x.field_name}"', fields)) + ",)"
         else:
             fields_list = ""
         attrib_args = ", ".join(map(lambda x: f"{x.field_name}", parent_attribs))
