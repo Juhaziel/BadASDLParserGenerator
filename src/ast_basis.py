@@ -161,7 +161,7 @@ class NodeVisitor:
     def generic_visit(self, node) -> 'AST':
         """Called if nothing else matches the specified node."""
         for child in iter_child_nodes(node):
-            self.visit(node)
+            self.visit(child)
         return node
 
 class NodeTransformer(NodeVisitor):
